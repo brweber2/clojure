@@ -39,6 +39,17 @@ ignore that for now, it will be removed when the grammar stabilizes somewhat.
 You should see the string "holy smokes!" print twice near the end of the 
 output.
 
+List of Modified Files:
+
+readme.txt
+src/jvm/clojure/lang/LineNumberingPushbackReader.java
+src/jvm/clojure/lang/LispReader.java
+src/jvm/clojure/lang/Compiler.java
+
+List of New Files:
+
+src/jvm/clojure/lang/AlternateReader.java
+
 --------------------------------------------------------------------------
 
  *   Clojure
