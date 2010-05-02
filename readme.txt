@@ -1,3 +1,46 @@
+This is a FORK of Clojure and not the official version of Clojure!  More
+specifically this is a fork of clojure 1.2.0-master-SNAPSHOT. This is NOT
+a stable release of Clojure, it is highly experimental.  Use at your own
+risk.
+  
+WHY A FORK?
+
+This fork provides an alternate reader in addition to the LispReader.  The
+goal is to provide a syntax that is more familiar to non-Lisp programmers.
+To use the LispReader name your file with the traditional .clj extension.
+To use the alternate syntax reader name your source file with the .bbw 
+extension.  The advantage to having an alternate reader is that all the
+reader has to do is parse the source and return Clojure's existing data
+structures.  The compiler and RT have remained virtually unchanged.
+
+WHAT DOES THE GRAMMAR LOOK LIKE?
+
+It is still very much a moving target, documentation will be added as it
+stabilizes.  You can view a working sample in the 'how do I try it out?' 
+section below.
+
+HOW DO I TRY IT OUT?
+
+Save the following content to a file named "source.bbw"
+==========================================================================
+function hi [ java.lang.String name ] {
+  println(name)
+  println(name)
+}
+
+hi("holy smokes!")
+==========================================================================
+
+To Build: ant
+To Run: java -cp clojure-1.2.0-master-SNAPSHOT.jar source.bbw
+
+You will notice a lot of garbage printing to standard out.  You can safely 
+ignore that for now, it will be removed when the grammar stabilizes somewhat.
+You should see the string "holy smokes!" print twice near the end of the 
+output.
+
+--------------------------------------------------------------------------
+
  *   Clojure
  *   Copyright (c) Rich Hickey. All rights reserved.
  *   The use and distribution terms for this software are covered by the
