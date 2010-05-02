@@ -112,9 +112,27 @@ public static class ReaderException extends Exception{
 	}
 }
 
-static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
+static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive) throws Exception {
+    return read( r, eofIsError, eofValue, isRecursive, ".clj" );
+}
+    
+static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive, String filename )
 		throws Exception{
+    // todo make this an actual property
+    if (filename.endsWith( AlternateReader.FILE_EXTENSION )) { 
+        return AlternateReader.read(r,eofIsError,eofValue,isRecursive);
+    }
+    else if ( filename.endsWith(".clj") ) {
+        return  clojure_read(r,eofIsError, eofValue, isRecursive);
+    }
+    else {
+        throw new RuntimeException("Unsupported file extension for " + filename);
+    }
+}
 
+    
+static public Object clojure_read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
+		throws Exception{
 	try
 		{
 		for(; ;)
@@ -181,7 +199,7 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 		}
 }
 
-static private String readToken(PushbackReader r, char initch) throws Exception{
+static public String readToken(PushbackReader r, char initch) throws Exception{
 	StringBuilder sb = new StringBuilder();
 	sb.append(initch);
 
@@ -197,7 +215,7 @@ static private String readToken(PushbackReader r, char initch) throws Exception{
 		}
 }
 
-static private Object readNumber(PushbackReader r, char initch) throws Exception{
+static protected Object readNumber(PushbackReader r, char initch) throws Exception{
 	StringBuilder sb = new StringBuilder();
 	sb.append(initch);
 
@@ -256,7 +274,7 @@ static private int readUnicodeChar(PushbackReader r, int initch, int base, int l
 	return uc;
 }
 
-static private Object interpretToken(String s) throws Exception{
+static public Object interpretToken(String s) throws Exception{
 	if(s.equals("nil"))
 		{
 		return null;
@@ -287,7 +305,7 @@ static private Object interpretToken(String s) throws Exception{
 }
 
 
-private static Object matchSymbol(String s){
+public static Object matchSymbol(String s){
 	Matcher m = symbolPat.matcher(s);
 	if(m.matches())
 		{

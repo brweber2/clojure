@@ -778,10 +778,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			Expr instance = null;
 			if(c == null)
 				instance = analyze(context == C.EVAL ? context : C.EXPRESSION, RT.second(form));
-			boolean maybeField = RT.length(form) == 3 &&
-			                     (RT.third(form) instanceof Symbol
-									|| RT.third(form) instanceof Keyword);
-			if(maybeField && !(RT.third(form) instanceof Keyword))
+			boolean maybeField = RT.length(form) == 3 && RT.third(form) instanceof Symbol;
+			if(maybeField)
 				{
 				Symbol sym = (Symbol) RT.third(form);
 				if(c != null)
@@ -791,9 +789,7 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				}
 			if(maybeField)    //field
 				{
-				Symbol sym = (RT.third(form) instanceof Keyword)?
-				             ((Keyword)RT.third(form)).sym
-							:(Symbol) RT.third(form);
+				Symbol sym = (Symbol) RT.third(form);
 				Symbol tag = tagOf(form);
 				if(c != null) {
 					return new StaticFieldExpr(line, c, munge(sym.name), tag);
@@ -5285,10 +5281,11 @@ private static Expr analyzeSeq(C context, ISeq form, String name) throws Excepti
 		}
 	catch(Throwable e)
 		{
-		if(!(e instanceof CompilerException))
-			throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
-		else
-			throw (CompilerException) e;
+        e.printStackTrace(  );
+        if(!(e instanceof CompilerException))
+            throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
+        else
+            throw (CompilerException) e;
 		}
 	finally
 		{
@@ -5331,9 +5328,13 @@ public static Object eval(Object form, boolean freshLoader) throws Exception{
 			        && !(RT.first(form) instanceof Symbol
 			             && ((Symbol) RT.first(form)).name.startsWith("def")))
 				{
+                    System.out.println( "let's analyze an expression...." + form );
 				ObjExpr fexpr = (ObjExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
 				IFn fn = (IFn) fexpr.eval();
-				return fn.invoke();
+                    System.out.println( "expr was " + fn );
+				Object result = fn.invoke();
+                    System.out.println( "expr result was " + result );
+                    return result;
 				}
 			else
 				{
@@ -5348,6 +5349,7 @@ public static Object eval(Object form, boolean freshLoader) throws Exception{
 		}
 	catch(Throwable e)
 		{
+            e.printStackTrace(  );
 		if(!(e instanceof CompilerException))
 			throw new CompilerException((String) SOURCE.deref(), (Integer) LINE.deref(), e);
 		else
@@ -5762,11 +5764,15 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 
 	try
 		{
-		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
-		    r = LispReader.read(pushbackReader, false, EOF, false))
+            System.out.println( "source name is " + sourceName + " ends with .clj? " + sourceName.endsWith( ".clj" ));
+		for(Object r = LispReader.read(pushbackReader, false, EOF, false, sourceName ); r != EOF;
+		    r = LispReader.read(pushbackReader, false, EOF, false, sourceName ))
 			{
+                System.out.println( "source name is " + sourceName + " ends with .clj? " + sourceName.endsWith( ".clj" ));
 			LINE_AFTER.set(pushbackReader.getLineNumber());
+                System.out.println( "going to eval " + r );
 			ret = eval(r,false);
+                System.out.println( "eval'd to " + ret );
 			LINE_BEFORE.set(pushbackReader.getLineNumber());
 			}
 		}
@@ -5895,8 +5901,8 @@ public static Object compile(Reader rdr, String sourcePath, String sourceName) t
 		                                            cv);
 		gen.visitCode();
 
-		for(Object r = LispReader.read(pushbackReader, false, EOF, false); r != EOF;
-		    r = LispReader.read(pushbackReader, false, EOF, false))
+		for(Object r = LispReader.read(pushbackReader, false, EOF, false, sourceName ); r != EOF;
+		    r = LispReader.read(pushbackReader, false, EOF, false, sourceName ))
 			{
 				LINE_AFTER.set(pushbackReader.getLineNumber());
 				compile1(gen, objx, r);
