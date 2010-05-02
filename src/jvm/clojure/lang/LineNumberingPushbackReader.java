@@ -24,12 +24,14 @@ public class LineNumberingPushbackReader extends PushbackReader{
 // single '\n'.
 
 private static final int newline = (int) '\n';
+    
+public static final int PUSHBACK_BUFFER_SIZE = 20;
 
 private boolean _atLineStart = true;
 private boolean _prev;
 
 public LineNumberingPushbackReader(Reader r){
-	super(new LineNumberReader(r));
+	super(new LineNumberReader(r), PUSHBACK_BUFFER_SIZE);
 }
 
 public int getLineNumber(){
