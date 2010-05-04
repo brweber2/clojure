@@ -106,7 +106,7 @@ public class AlternateReader
 
             LispReader.unread( r, ch );
 
-            if ( peekFor( "}", r ) || peekFor( ")", r ) )
+            if ( peekFor( "}", r ) || peekFor( ")", r ) || peekFor( ">", r ) || peekFor( "]", r ) )
             {
                 return null;
             }
@@ -134,6 +134,26 @@ public class AlternateReader
             if ( peekFor( "{", r ) )
             {
                 return readBlock( r );
+            }
+
+            if ( peekFor( "#(", r ) )
+            {
+                return getList( r );
+            }
+
+            if ( peekFor( "#[", r ) )
+            {
+                return getVector( r );
+            }
+
+            if ( peekFor( "#<", r ) )
+            {
+                return getSet( r );
+            }
+
+            if ( peekFor( "#{", r ) )
+            {
+                return getMap( r );
             }
 
             Object invocation = readInvocation( r );
@@ -249,9 +269,16 @@ public class AlternateReader
         skipWhitespace( r );
         Object expression = readExpression( r );
 
+        // process until the end of the current block
+        Object[] exprs = readExpressions( r, "}" );
+        // trick our block reader into reading just the end...
+        unreadString( "}", r );
+        
+        ISeq result = RT.listStar( Compiler.LET, RT.vector( variable, expression ), RT.arrayToList( exprs ) );
+
         System.out.println( "done reading value" );
         // (let [variable expression] ... )
-        return RT.list( Compiler.LET, RT.vector( variable, expression ) ); // todo what about content?
+        return result;
     }
 
     static public Object[] readParams( PushbackReader r ) throws Exception
@@ -285,7 +312,7 @@ public class AlternateReader
             System.out.println( "attempting to read expression" );
             skipWhitespace( r );
             Object expr = readExpression( r );
-            System.out.println( "read expression " + expr );
+            System.out.println( "read expression: " + expr );
             if ( expr == null )
             {
                 System.out.println( "found null expr" );
@@ -293,6 +320,7 @@ public class AlternateReader
             }
             else
             {
+                System.out.println( "adding normal expression " + expr );
                 expressions.add( expr );
             }
             System.out.println( "read an expression" );
@@ -332,14 +360,14 @@ public class AlternateReader
         skipWhitespace( r );
         Object[] params = readParams( r );
         skipWhitespace( r );
-        Object block = readBlock( r );
+        ISeq block = readBlock( r );
 
         System.out.println( "done reading function!" );
 
-        return RT.list( Symbol.intern( "defn" ), name, RT.vector( params ), block );
+        return RT.listStar( Symbol.intern( "defn" ), name, RT.vector( params ), block );
     }
 
-    static public Object readBlock( PushbackReader r ) throws Exception
+    static public ISeq readBlock( PushbackReader r ) throws Exception
     {
         System.out.println( "attempting to read block" );
         skipWhitespace( r );
@@ -347,7 +375,8 @@ public class AlternateReader
         skipWhitespace( r );
         Object[] expressions = readExpressions( r, "}" );
         System.out.println( "done reading block" );
-        return RT.listStar( Symbol.intern( "do" ), RT.arrayToList( expressions ) );
+        
+        return RT.arrayToList( expressions );
     }
 
     static public Object readInvocation( PushbackReader r ) throws Exception
@@ -363,7 +392,7 @@ public class AlternateReader
             name2 = readName( r );
         }
         skipWhitespace( r );
-        if ( peekFor( "(", r ) ) 
+        if ( peekFor( "(", r ) )
         {
             readKeyword( "(", r );
             Object[] args = readExpressions( r, ")" );
@@ -379,7 +408,47 @@ public class AlternateReader
         }
         else
         {
-            return LispReader.interpretToken( ((Symbol) name1).getName() );
+            return LispReader.interpretToken( ( ( Symbol ) name1 ).getName() );
         }
+    }
+
+    static public IPersistentVector getVector( PushbackReader r ) throws Exception
+    {
+        readKeyword( "#[", r );
+        skipWhitespace( r );
+        Object[] exprs = readExpressions( r, "]" );
+        return RT.vector( exprs );
+    }
+
+    static public ISeq getList( PushbackReader r ) throws Exception
+    {
+        readKeyword( "#(", r );
+        skipWhitespace( r );
+        Object[] exprs = readExpressions( r, ")" );
+
+        return RT.listStar( Compiler.QUOTE, RT.list( RT.arrayToList( exprs ) ) );
+    }
+
+    static public IPersistentSet getSet( PushbackReader r ) throws Exception
+    {
+        readKeyword( "#<", r );
+        skipWhitespace( r );
+        Object[] exprs = readExpressions( r, ">" );
+
+        return RT.set( exprs );
+    }
+
+    static public IPersistentMap getMap( PushbackReader r ) throws Exception
+    {
+        readKeyword( "#{", r );
+        skipWhitespace( r );
+        Object[] exprs = readExpressions( r, "}" );
+
+        if ( exprs.length % 2 != 0 )
+        {
+            throw new RuntimeException( "Maps require a value for every key." );
+        }
+
+        return RT.map( exprs );
     }
 }
