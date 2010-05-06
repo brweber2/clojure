@@ -1,0 +1,6 @@
+function interdo [ ISeq seq ] {
+  val cnt = seq .count()
+  cnt .+( 2 )
+}
+
+println( interdo( #( 1, 2, "3" ) ) )

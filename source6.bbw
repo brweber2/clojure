@@ -1,0 +1,10 @@
+function greet [ java.lang.String name, boolean isCowboy ] {
+  if( isCowboy {
+    println( "howdy " name )
+  } { 
+    println( "hi " name )
+  } )
+}
+
+greet( "James", true )
+greet( "Agnes", false )

@@ -1,0 +1,5 @@
+function hi [ java.lang.String name ] {
+  println( "hi " name )
+}
+
+hi( "Charles")

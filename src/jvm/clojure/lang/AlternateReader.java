@@ -376,7 +376,8 @@ public class AlternateReader
         Object[] expressions = readExpressions( r, "}" );
         System.out.println( "done reading block" );
         
-        return RT.arrayToList( expressions );
+        return RT.listStar( Symbol.intern( "do" ), RT.arrayToList( expressions ) );
+//        return RT.arrayToList( expressions );
     }
 
     static public Object readInvocation( PushbackReader r ) throws Exception

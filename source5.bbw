@@ -1,0 +1,9 @@
+function interdo [ ISeq seq ] {
+  val cnt = seq .count()
+  val sum =  cnt .+( 2 )
+  val str = "hiya "
+  println( str, "Dave, sum is ", sum, " and count was ", cnt )
+  sum
+}
+
+println( interdo( #( 1, 2, "3" ) ) )
