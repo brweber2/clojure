@@ -407,8 +407,9 @@ static class DefExpr implements Expr{
 			if(!v.ns.equals(currentNS()))
 				{
 				if(sym.ns == null)
-					throw new Exception("Name conflict, can't def " + sym + " because namespace: " + currentNS().name +
-					                    " refers to:" + v);
+					v = currentNS().intern(sym);
+//					throw new Exception("Name conflict, can't def " + sym + " because namespace: " + currentNS().name +
+//					                    " refers to:" + v);
 				else
 					throw new Exception("Can't create defs outside of current ns");
 				}
@@ -4297,6 +4298,13 @@ public static class FnMethod extends ObjMethod{
 	}
 
 	Type[] getArgTypes(){
+		if(isVariadic() && reqParms.count() == MAX_POSITIONAL_ARITY)
+			{
+			Type[] ret = new Type[MAX_POSITIONAL_ARITY + 1];
+			for(int i = 0;i<MAX_POSITIONAL_ARITY + 1;i++)
+				ret[i] = OBJECT_TYPE;
+			return ret;
+			}
 		return  ARG_TYPES[numParams()];
 	}
 

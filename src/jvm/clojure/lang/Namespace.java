@@ -12,13 +12,16 @@
 
 package clojure.lang;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.io.PrintWriter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Namespace extends AReference{
+public class Namespace extends AReference implements Serializable {
 final public Symbol name;
-final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>();
-final AtomicReference<IPersistentMap> aliases = new AtomicReference<IPersistentMap>();
+transient final AtomicReference<IPersistentMap> mappings = new AtomicReference<IPersistentMap>();
+transient final AtomicReference<IPersistentMap> aliases = new AtomicReference<IPersistentMap>();
 
 final static ConcurrentHashMap<Symbol, Namespace> namespaces = new ConcurrentHashMap<Symbol, Namespace>();
 
@@ -64,7 +67,23 @@ public Var intern(Symbol sym){
 	if(o instanceof Var && ((Var) o).ns == this)
 		return (Var) o;
 
-	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+//	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+
+	if(v == null)
+		v = new Var(this, sym);
+
+	warnOnReplace(sym, o, v);
+
+
+	while(!mappings.compareAndSet(map, map.assoc(sym, v)))
+		map = getMappings();
+
+	return v;
+}
+
+private void warnOnReplace(Symbol sym, Object o, Object v){
+	((PrintWriter) RT.ERR.deref()).println("WARNING: " + sym + " already refers to: " + o + " in namespace: " + name
+		+ ", being replaced by: " + v);
 }
 
 Object reference(Symbol sym, Object val){
@@ -83,7 +102,14 @@ Object reference(Symbol sym, Object val){
 	if(o == val)
 		return o;
 
-	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+//	throw new IllegalStateException(sym + " already refers to: " + o + " in namespace: " + name);
+	warnOnReplace(sym, o, val);
+
+	while(!mappings.compareAndSet(map, map.assoc(sym, val)))
+		map = getMappings();
+
+	return val;
+
 }
 
 public static boolean areDifferentInstancesOfSameClassName(Class cls1, Class cls2) {
@@ -203,5 +229,11 @@ public void removeAlias(Symbol alias) throws Exception{
 		aliases.compareAndSet(map, newMap);
 		map = getAliases();
 		}
+}
+
+private Object readResolve() throws ObjectStreamException {
+    // ensures that serialized namespaces are "deserialized" to the
+    // namespace in the present runtime
+    return findOrCreate(name);
 }
 }
