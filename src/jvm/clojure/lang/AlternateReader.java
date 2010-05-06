@@ -23,6 +23,8 @@ public class AlternateReader
     {
         macros['"'] = new LispReader.StringReader();
         macros[';'] = new LispReader.CommentReader();
+        macros['\''] = new LispReader.WrappingReader(LispReader.QUOTE);
+        macros['^'] = new LispReader.MetaReader();
         macros['\\'] = new LispReader.CharacterReader();
     }
 
@@ -342,7 +344,7 @@ public class AlternateReader
 
 //        System.out.println( "done reading instantiation" );
 
-        return RT.listStar( className + ".", RT.arrayToList( args ) );
+        return RT.listStar( Symbol.intern(className + "."), RT.arrayToList( args ) );
     }
 
     static public Object readFunction( PushbackReader r ) throws Exception
@@ -380,12 +382,13 @@ public class AlternateReader
 //        System.out.println( "attempting to read invocation" );
         skipWhitespace( r );
         Object name1 = readName( r );
+        
         Object name2 = null;
         skipWhitespace( r );
         if ( readKeyword( ".", r ) )
         {
             skipWhitespace( r );
-            name2 = "." + readName( r );
+            name2 = Symbol.intern("." + readName( r ) );
         }
         skipWhitespace( r );
         if ( peekFor( "(", r ) )
@@ -404,7 +407,7 @@ public class AlternateReader
         }
         else
         {
-            return LispReader.interpretToken( ( ( Symbol ) name1 ).getName() );
+            return LispReader.interpretToken( name1.toString() );
         }
     }
 

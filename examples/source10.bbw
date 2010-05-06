@@ -1,0 +1,6 @@
+{
+val str = new StringBuilder()
+str .append("abc")
+str .append("def")
+println(str .toString())
+}

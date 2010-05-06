@@ -1,0 +1,8 @@
+{
+val str = new StringBuilder()
+doto( str .append( "abc") .append("def") )
+println( str .toString() )
+
+
+->>( str { println( "a") str .toString() } println("b") )
+}
