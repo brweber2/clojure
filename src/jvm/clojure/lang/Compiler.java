@@ -5770,9 +5770,9 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 			{
 //                System.out.println( "source name is " + sourceName + " ends with .clj? " + sourceName.endsWith( ".clj" ));
 			LINE_AFTER.set(pushbackReader.getLineNumber());
-                System.out.println( "going to eval " + r );
+                System.out.println( "going to eval: " + r );
 			ret = eval(r,false);
-                System.out.println( "eval'd to " + ret );
+                System.out.println( ret );
 			LINE_BEFORE.set(pushbackReader.getLineNumber());
 			}
 		}
