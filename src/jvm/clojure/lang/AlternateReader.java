@@ -247,14 +247,9 @@ public class AlternateReader
 
         Object name = readName( r );
 //        System.out.println( "found namespace " + name );
-        return readNamespace( name );
-    }
-
-    static public Object readNamespace( Object s )
-    {
-        Symbol ks = Symbol.intern( s.toString() );
-        Namespace kns = Compiler.namespaceFor( ks );
-        return Keyword.intern( kns.name.name, ks.name );
+        System.out.println( "going to create ns: " + name.toString() );
+        Symbol ks = Symbol.intern( name.toString() );
+        return RT.inNamespace.invoke(ks);
     }
 
     static public Object readValue( PushbackReader r ) throws Exception

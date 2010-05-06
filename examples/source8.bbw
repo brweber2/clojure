@@ -1,0 +1,4 @@
+; namespace pachau
+in-ns(quote(pachau))
+clojure.core/use(quote(clojure.core))
+println("yippee")

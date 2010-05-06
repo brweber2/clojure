@@ -4,6 +4,7 @@ classes/*
 pom.xml
 clojure.iws
 clojure.ipr
+clojure.iml
 nbproject/private/
 *.zip
 dist
