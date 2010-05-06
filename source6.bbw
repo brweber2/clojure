@@ -1,7 +1,9 @@
 function greet [ java.lang.String name, boolean isCowboy ] {
-  if( isCowboy {
+  if( isCowboy 
+  {
     println( "howdy " name )
-  } { 
+  } 
+  { 
     println( "hi " name )
   } )
 }

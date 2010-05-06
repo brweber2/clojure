@@ -5328,12 +5328,12 @@ public static Object eval(Object form, boolean freshLoader) throws Exception{
 			        && !(RT.first(form) instanceof Symbol
 			             && ((Symbol) RT.first(form)).name.startsWith("def")))
 				{
-                    System.out.println( "let's analyze an expression...." + form );
+//                    System.out.println( "let's analyze an expression...." + form );
 				ObjExpr fexpr = (ObjExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form), "eval");
 				IFn fn = (IFn) fexpr.eval();
-                    System.out.println( "expr was " + fn );
+//                    System.out.println( "expr was " + fn );
 				Object result = fn.invoke();
-                    System.out.println( "expr result was " + result );
+//                    System.out.println( "expr result was " + result );
                     return result;
 				}
 			else
@@ -5764,11 +5764,11 @@ public static Object load(Reader rdr, String sourcePath, String sourceName) thro
 
 	try
 		{
-            System.out.println( "source name is " + sourceName + " ends with .clj? " + sourceName.endsWith( ".clj" ));
+//            System.out.println( "source name is " + sourceName + " ends with .clj? " + sourceName.endsWith( ".clj" ));
 		for(Object r = LispReader.read(pushbackReader, false, EOF, false, sourceName ); r != EOF;
 		    r = LispReader.read(pushbackReader, false, EOF, false, sourceName ))
 			{
-                System.out.println( "source name is " + sourceName + " ends with .clj? " + sourceName.endsWith( ".clj" ));
+//                System.out.println( "source name is " + sourceName + " ends with .clj? " + sourceName.endsWith( ".clj" ));
 			LINE_AFTER.set(pushbackReader.getLineNumber());
                 System.out.println( "going to eval " + r );
 			ret = eval(r,false);

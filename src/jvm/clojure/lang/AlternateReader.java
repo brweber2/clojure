@@ -39,7 +39,7 @@ public class AlternateReader
     static public Object read( PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive )
             throws Exception
     {
-        System.out.println( "Attempting to read an alternate lisp object." );
+//        System.out.println( "Attempting to read an alternate lisp object." );
 
         for (; ; )
         {
@@ -47,7 +47,7 @@ public class AlternateReader
 
             int ch = r.read();
 
-            System.out.println( "read char " + ( char ) ch );
+//            System.out.println( "read char " + ( char ) ch );
 
             if ( ch == -1 )
             {
@@ -74,7 +74,7 @@ public class AlternateReader
             IFn macroFn = getMacro( ch );
             if ( macroFn != null )
             {
-                System.out.println( "found macro function: " + macroFn );
+//                System.out.println( "found macro function: " + macroFn );
                 Object ret = macroFn.invoke( r, ( char ) ch );
                 if ( RT.suppressRead() )
                 {
@@ -187,7 +187,7 @@ public class AlternateReader
     public static Object readName( PushbackReader r ) throws Exception
     {
         String token = LispReader.readToken( r, ( char ) r.read() );
-        System.out.println( "read name " + token );
+//        System.out.println( "read name " + token );
         return LispReader.matchSymbol( token );
     }
 
@@ -240,13 +240,13 @@ public class AlternateReader
 
     static public Object readNamespace( PushbackReader r ) throws Exception
     {
-        System.out.println( "attempting to read namespace" );
+//        System.out.println( "attempting to read namespace" );
         skipWhitespace( r );
         readKeyword( "namespace", r );
         skipWhitespace( r );
 
         Object name = readName( r );
-        System.out.println( "found namespace " + name );
+//        System.out.println( "found namespace " + name );
         return readNamespace( name );
     }
 
@@ -259,7 +259,7 @@ public class AlternateReader
 
     static public Object readValue( PushbackReader r ) throws Exception
     {
-        System.out.println( "attempting to read value" );
+//        System.out.println( "attempting to read value" );
         skipWhitespace( r );
         readKeyword( "val", r );
         skipWhitespace( r );
@@ -276,14 +276,14 @@ public class AlternateReader
         
         ISeq result = RT.listStar( Compiler.LET, RT.vector( variable, expression ), RT.arrayToList( exprs ) );
 
-        System.out.println( "done reading value" );
+//        System.out.println( "done reading value" );
         // (let [variable expression] ... )
         return result;
     }
 
     static public Object[] readParams( PushbackReader r ) throws Exception
     {
-        System.out.println( "attempting to read params" );
+//        System.out.println( "attempting to read params" );
         List params = new ArrayList();
         readKeyword( "[", r );
         skipWhitespace( r );
@@ -296,36 +296,36 @@ public class AlternateReader
             skipWhitespace( r );
             ( ( Symbol ) name ).withMeta( RT.map( RT.TAG_KEY, theType ) );
             params.add( name );
-            System.out.println( "read param: " + theType + ":" + name );
+//            System.out.println( "read param: " + theType + ":" + name );
             theType = readName( r );
         }
-        System.out.println( "done reading params" );
+//        System.out.println( "done reading params" );
         return params.toArray();
     }
 
     static public Object[] readExpressions( PushbackReader r, String endToken ) throws Exception
     {
-        System.out.println( "attempting to read expressions" );
+//        System.out.println( "attempting to read expressions" );
         List<Object> expressions = new ArrayList<Object>();
         while ( !readKeyword( endToken, r ) )
         {
-            System.out.println( "attempting to read expression" );
+//            System.out.println( "attempting to read expression" );
             skipWhitespace( r );
             Object expr = readExpression( r );
-            System.out.println( "read expression: " + expr );
+//            System.out.println( "read expression: " + expr );
             if ( expr == null )
             {
-                System.out.println( "found null expr" );
+//                System.out.println( "found null expr" );
                 continue;
             }
             else
             {
-                System.out.println( "adding normal expression " + expr );
+//                System.out.println( "adding normal expression " + expr );
                 expressions.add( expr );
             }
-            System.out.println( "read an expression" );
+//            System.out.println( "read an expression" );
         }
-        System.out.println( "done reading expressions" );
+//        System.out.println( "done reading expressions" );
         return expressions.toArray();
     }
 
@@ -336,7 +336,7 @@ public class AlternateReader
 
     static public Object readInstantiation( PushbackReader r ) throws Exception
     {
-        System.out.println( "attempting to read instantiation" );
+//        System.out.println( "attempting to read instantiation" );
         skipWhitespace( r );
         readKeyword( "new", r );
         skipWhitespace( r );
@@ -345,14 +345,14 @@ public class AlternateReader
         readKeyword( "(", r );
         Object[] args = readExpressions( r, ")" );
 
-        System.out.println( "done reading instantiation" );
+//        System.out.println( "done reading instantiation" );
 
         return RT.listStar( className + ".", RT.arrayToList( args ) );
     }
 
     static public Object readFunction( PushbackReader r ) throws Exception
     {
-        System.out.println( "attempting to read function" );
+//        System.out.println( "attempting to read function" );
         skipWhitespace( r );
         readKeyword( "function", r );
         skipWhitespace( r );
@@ -362,19 +362,19 @@ public class AlternateReader
         skipWhitespace( r );
         ISeq block = readBlock( r );
 
-        System.out.println( "done reading function!" );
+//        System.out.println( "done reading function!" );
 
         return RT.listStar( Symbol.intern( "defn" ), name, RT.vector( params ), block );
     }
 
     static public ISeq readBlock( PushbackReader r ) throws Exception
     {
-        System.out.println( "attempting to read block" );
+//        System.out.println( "attempting to read block" );
         skipWhitespace( r );
         readKeyword( "{", r );
         skipWhitespace( r );
         Object[] expressions = readExpressions( r, "}" );
-        System.out.println( "done reading block" );
+//        System.out.println( "done reading block" );
         
         return RT.listStar( Symbol.intern( "do" ), RT.arrayToList( expressions ) );
 //        return RT.arrayToList( expressions );
@@ -382,7 +382,7 @@ public class AlternateReader
 
     static public Object readInvocation( PushbackReader r ) throws Exception
     {
-        System.out.println( "attempting to read invocation" );
+//        System.out.println( "attempting to read invocation" );
         skipWhitespace( r );
         Object name1 = readName( r );
         Object name2 = null;
@@ -390,14 +390,14 @@ public class AlternateReader
         if ( readKeyword( ".", r ) )
         {
             skipWhitespace( r );
-            name2 = readName( r );
+            name2 = "." + readName( r );
         }
         skipWhitespace( r );
         if ( peekFor( "(", r ) )
         {
             readKeyword( "(", r );
             Object[] args = readExpressions( r, ")" );
-            System.out.println( "done reading invocation" );
+//            System.out.println( "done reading invocation" );
             if ( name2 == null )
             {
                 return RT.listStar( name1, RT.arrayToList( args ) );

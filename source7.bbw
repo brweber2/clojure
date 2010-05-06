@@ -1,0 +1,5 @@
+function attempt [ java.lang.Object something ] {
+  try( something() catch( java.lang.Exception e { e .printStackTrace() } ) )
+}
+
+attempt( fn( #[] println("wow") ) )
