@@ -919,9 +919,9 @@ static class InstanceFieldExpr extends FieldExpr implements AssignableExpr{
 		this.tag = tag;
 		if(field == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
-			((PrintWriter) RT.ERR.deref())
-					.format("Reflection warning, %s:%d - reference to field %s can't be resolved.\n",
-							SOURCE_PATH.deref(), line, fieldName);
+			RT.errPrintWriter()
+		      .format("Reflection warning, %s:%d - reference to field %s can't be resolved.\n",
+					  SOURCE_PATH.deref(), line, fieldName);
 			}
 	}
 
@@ -1130,8 +1130,7 @@ static abstract class MethodExpr extends HostExpr{
 				}
 			catch(Exception e1)
 				{
-				e1.printStackTrace((PrintWriter) RT.ERR
-						.deref());  //To change body of catch statement use File | Settings | File Templates.
+				e1.printStackTrace(RT.errPrintWriter());
 				}
 
 			}
@@ -1195,9 +1194,9 @@ static class InstanceMethodExpr extends MethodExpr{
 
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
-			((PrintWriter) RT.ERR.deref())
-					.format("Reflection warning, %s:%d - call to %s can't be resolved.\n",
-							SOURCE_PATH.deref(), line, methodName);
+			RT.errPrintWriter()
+		      .format("Reflection warning, %s:%d - call to %s can't be resolved.\n",
+					  SOURCE_PATH.deref(), line, methodName);
 			}
 	}
 
@@ -1344,9 +1343,9 @@ static class StaticMethodExpr extends MethodExpr{
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
-			((PrintWriter) RT.ERR.deref())
-					.format("Reflection warning, %s:%d - call to %s can't be resolved.\n",
-							SOURCE_PATH.deref(), line, methodName);
+			RT.errPrintWriter()
+              .format("Reflection warning, %s:%d - call to %s can't be resolved.\n",
+                      SOURCE_PATH.deref(), line, methodName);
 			}
 	}
 
@@ -2060,9 +2059,9 @@ public static class NewExpr implements Expr{
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
 		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
-			((PrintWriter) RT.ERR.deref())
-					.format("Reflection warning, %s:%d - call to %s ctor can't be resolved.\n",
-							SOURCE_PATH.deref(), line, c.getName());
+			RT.errPrintWriter()
+              .format("Reflection warning, %s:%d - call to %s ctor can't be resolved.\n",
+                      SOURCE_PATH.deref(), line, c.getName());
 			}
 	}
 
