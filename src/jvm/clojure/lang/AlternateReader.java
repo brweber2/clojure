@@ -249,7 +249,7 @@ public class AlternateReader
 
         Object name = readName( r );
 //        System.out.println( "found namespace " + name );
-        System.out.println( "going to create ns: " + name.toString() );
+//        System.out.println( "going to create ns: " + name.toString() );
         Symbol ks = Symbol.intern( name.toString() );
         return RT.inNamespace.invoke(ks);
     }
@@ -396,15 +396,18 @@ public class AlternateReader
             if ( methodName instanceof Symbol )
             {
                 String methodNameString = ((Symbol)methodName).getName();
-                if ( methodNameString.length() == 1 )
+                StringBuilder sb = new StringBuilder();
+                for ( char c : methodNameString.toCharArray() )
                 {
-                    Character mChar = methodNameString.toCharArray()[0];
-                    if ( Compiler.CHAR_MAP.containsKey( mChar ) )
+                    // if we have any munged chars, drop the '.'
+                    if ( Compiler.CHAR_MAP.containsKey( c ) )
                     {
-                        name2 = Symbol.intern( methodNameString );
+//                        System.out.println( "found special char " + c );
                         setName2 = true;
                     }
+                        sb.append( c );
                 }
+                name2 = Symbol.intern( sb.toString() );
             }
             if ( !setName2 )
             {
