@@ -388,7 +388,29 @@ public class AlternateReader
         if ( readKeyword( ".", r ) )
         {
             skipWhitespace( r );
-            name2 = Symbol.intern("." + readName( r ) );
+            Object methodName = readName( r );
+            
+            // if this method name is a single char that will be munged, we have to drop the dot
+            // not 100% that this will work globally...
+            boolean setName2 = false;
+            if ( methodName instanceof Symbol )
+            {
+                String methodNameString = ((Symbol)methodName).getName();
+                if ( methodNameString.length() == 1 )
+                {
+                    Character mChar = methodNameString.toCharArray()[0];
+                    if ( Compiler.CHAR_MAP.containsKey( mChar ) )
+                    {
+                        name2 = Symbol.intern( methodNameString );
+                        setName2 = true;
+                    }
+                }
+            }
+            if ( !setName2 )
+            {
+                name2 = Symbol.intern("." + methodName );
+            }
+
         }
         skipWhitespace( r );
         if ( peekFor( "(", r ) )
