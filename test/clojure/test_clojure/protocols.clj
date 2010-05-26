@@ -66,6 +66,15 @@
   (getValue [_] v))
 
 (deftest protocols-test
+  (testing "protocol fns have useful metadata"
+    (let [common-meta {:ns (find-ns 'clojure.test-clojure.protocols.examples)
+                       :protocol #'ExampleProtocol}]
+      (are [m f] (= (merge (quote m) common-meta)
+                    (meta (var f)))
+           {:name foo :arglists ([a]) :doc "method with one arg"} foo
+           {:name bar :arglists ([a b]) :doc "method with two args"} bar
+           {:name baz :arglists ([a] [a b]) :doc "method with multiple arities" :tag String} baz
+           {:name with-quux :arglists ([a]) :doc "method name with a hyphen"} with-quux)))
   (testing "protocol fns throw IllegalArgumentException if no impl matches"
     (is (thrown-with-msg?
           IllegalArgumentException
@@ -82,7 +91,13 @@
     (let [obj (reify ExampleProtocol
                      (baz [a b] "two-arg baz!"))]
       (is (= "two-arg baz!" (baz obj nil)))
-      (is (thrown? AbstractMethodError (baz obj))))))
+      (is (thrown? AbstractMethodError (baz obj)))))
+  (testing "you can redefine a protocol with different methods"
+    (eval '(defprotocol Elusive (old-method [x])))
+    (eval '(defprotocol Elusive (new-method [x])))
+    (is (= :new-method (eval '(new-method (reify Elusive (new-method [x] :new-method))))))
+    (is (fails-with-cause? IllegalArgumentException #"No method of interface: user\.Elusive found for function: old-method of protocol: Elusive \(The protocol method may have been defined before and removed\.\)"
+          (eval '(old-method (reify Elusive (new-method [x] :new-method))))))))
 
 (deftype ExtendTestWidget [name])
 (deftype HasProtocolInline []
