@@ -191,10 +191,14 @@
  with-meta (fn with-meta [^clojure.lang.IObj x m]
              (. x (withMeta m))))
 
+(def ^{:private true :dynamic true}
+  assert-valid-fdecl (fn [fdecl]))
+
 (def
  ^{:private true}
  sigs
  (fn [fdecl]
+   (assert-valid-fdecl fdecl)
    (let [asig 
          (fn [fdecl]
            (let [arglist (first fdecl)
@@ -1222,11 +1226,11 @@
     (. rev (rseq)))
 
 (defn name
-  "Returns the name String of a symbol or keyword."
+  "Returns the name String of a string, symbol or keyword."
   {:tag String
    :added "1.0"}
   [^clojure.lang.Named x]
-    (. x (getName)))
+  (if (string? x) x (. x (getName))))
 
 (defn namespace
   "Returns the namespace String of a symbol or keyword, or nil if not present."
@@ -5652,3 +5656,9 @@
                         (keepi (inc idx) (rest s))
                         (cons x (keepi (inc idx) (rest s)))))))))]
        (keepi 0 coll))))
+
+(defn- ^{:dynamic true} assert-valid-fdecl
+  "A good fdecl looks like (([a] ...) ([a b] ...)) near the end of defn."
+  [fdecl]
+  (if-let [bad-args (seq (remove #(vector? %) (map first fdecl)))]
+    (throw (IllegalArgumentException. (str "Parameter declaration " (first bad-args) " should be a vector")))))
