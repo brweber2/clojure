@@ -4907,10 +4907,22 @@
 ;;;;;;;;;;;;; nested associative ops ;;;;;;;;;;;
 
 (defn get-in
-  "returns the value in a nested associative structure, where ks is a sequence of keys"
-  {:added "1.0"}
-  [m ks]
-  (reduce get m ks))
+  "Returns the value in a nested associative structure,
+  where ks is a sequence of ke(ys. Returns nil if the key is not present,
+  or the not-found value if supplied."
+  {:added "1.2"}
+  ([m ks]
+     (reduce get m ks))
+  ([m ks not-found]
+     (loop [sentinel (Object.)
+            m m
+            ks (seq ks)]
+       (if ks
+         (let [m (get m (first ks) sentinel)]
+           (if (identical? sentinel m)
+             not-found
+             (recur sentinel m (next ks))))
+         m))))
 
 (defn assoc-in
   "Associates a value in a nested associative structure, where ks is a
@@ -5656,6 +5668,30 @@
                         (keepi (inc idx) (rest s))
                         (cons x (keepi (inc idx) (rest s)))))))))]
        (keepi 0 coll))))
+
+(defn fnil
+  "Takes a function f, and returns a function that calls f, replacing
+  a nil first argument to f with the supplied value x. Higher arity
+  versions can replace arguments in the second and third
+  positions (y, z). Note that the function f can take any number of
+  arguments, not just the one(s) being nil-patched."
+  {:added "1.2"}
+  ([f x]
+   (fn
+     ([a] (f (if (nil? a) x a)))
+     ([a b] (f (if (nil? a) x a) b))
+     ([a b c] (f (if (nil? a) x a) b c))
+     ([a b c & ds] (apply f (if (nil? a) x a) b c ds))))
+  ([f x y]
+   (fn
+     ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
+     ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) c))
+     ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) c ds))))
+  ([f x y z]
+   (fn
+     ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
+     ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
+     ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
 
 (defn- ^{:dynamic true} assert-valid-fdecl
   "A good fdecl looks like (([a] ...) ([a b] ...)) near the end of defn."
